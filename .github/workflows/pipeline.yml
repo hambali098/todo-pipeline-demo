@@ -18,17 +18,9 @@ jobs:
 
       - name: Build and push images
         run: |
-          # Build images
           docker compose build
-          
-          # Cek nama image yang dihasilkan
-          docker images
-          
-          # Tag images dengan nama yang benar
-          docker tag todo-pipeline-demo-frontend:latest humbleboy123/frontend:latest
-          docker tag todo-pipeline-demo-backend:latest humbleboy123/backend:latest
-          
-          # Push ke Docker Hub
+          docker tag todo-pipeline-demo-frontend humbleboy123/frontend:latest
+          docker tag todo-pipeline-demo-backend humbleboy123/backend:latest
           docker push humbleboy123/frontend:latest
           docker push humbleboy123/backend:latest
 
@@ -40,5 +32,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /app/todo-pipeline-demo
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose pull
+            docker compose down
+            docker compose up -d
