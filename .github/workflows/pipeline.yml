@@ -18,11 +18,11 @@ jobs:
 
       - name: Build and push images
         run: |
-          docker-compose build
-          docker tag your-app-name_frontend ${{ secrets.DOCKER_USERNAME }}/frontend:latest
-          docker tag your-app-name_backend ${{ secrets.DOCKER_USERNAME }}/backend:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
+          docker compose build
+          docker tag todo-pipeline-demo_frontend humbleboy123/frontend:latest
+          docker tag todo-pipeline-demo_backend humbleboy123/backend:latest
+          docker push humbleboy123/frontend:latest
+          docker push humbleboy123/backend:latest
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
@@ -31,6 +31,6 @@ jobs:
           username: root
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /app
-            docker-compose pull
-            docker-compose up -d
+            cd /app/todo-pipeline-demo
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
