@@ -2,28 +2,37 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]  # Pipeline akan berjalan ketika ada push ke branch main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Checkout kode dari repository
       - uses: actions/checkout@v2
 
+      # Step 2: Login ke Docker Hub menggunakan credentials yang tersimpan di GitHub Secrets
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Step 3: Build dan push Docker images
       - name: Build and push images
         run: |
-          docker compose build
+          # Build images menggunakan konfigurasi production
+          docker compose -f docker-compose.prod.yml build
+          
+          # Tag images dengan nama yang sesuai untuk Docker Hub
           docker tag todo-pipeline-demo-frontend humbleboy123/frontend:latest
           docker tag todo-pipeline-demo-backend humbleboy123/backend:latest
+          
+          # Push images ke Docker Hub
           docker push humbleboy123/frontend:latest
           docker push humbleboy123/backend:latest
 
+      # Step 4: Deploy ke VPS menggunakan SSH
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
         with:
@@ -32,6 +41,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /app/todo-pipeline-demo
-            docker compose pull
-            docker compose down
-            docker compose up -d
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d
