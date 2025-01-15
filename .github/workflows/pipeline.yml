@@ -18,9 +18,17 @@ jobs:
 
       - name: Build and push images
         run: |
+          # Build images
           docker compose build
-          docker tag todo-pipeline-demo_frontend humbleboy123/frontend:latest
-          docker tag todo-pipeline-demo_backend humbleboy123/backend:latest
+          
+          # Cek nama image yang dihasilkan
+          docker images
+          
+          # Tag images dengan nama yang benar
+          docker tag todo-pipeline-demo-frontend:latest humbleboy123/frontend:latest
+          docker tag todo-pipeline-demo-backend:latest humbleboy123/backend:latest
+          
+          # Push ke Docker Hub
           docker push humbleboy123/frontend:latest
           docker push humbleboy123/backend:latest
 
