@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  frontend:
+    # Menggunakan image dari Docker Hub
+    image: humbleboy123/frontend:latest  # Ganti dengan username Docker Hub Anda
+    ports:
+      - "3002:3000"  # Menggunakan port 3002 karena 3000 dan 3001 sudah terpakai di VPS
+    networks:
+      - app_network
+    depends_on:
+      - backend
+
+  backend:
+    image: humbleboy123/backend:latest  # Ganti dengan username Docker Hub Anda
+    ports:
+      - "3003:3001"  # Menggunakan port 3003 untuk menghindari konflik
+    networks:
+      - app_network
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=example
+      - DB_NAME=tododb
+
+  db:
+    image: mysql:8
+    networks:
+      - app_network
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: tododb
+    volumes:
+      - db_data:/var/lib/mysql
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  db_data:
