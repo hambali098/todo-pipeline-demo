@@ -6,11 +6,12 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     image: ${DOCKER_USERNAME}/frontend:latest
+    container_name: todo-frontend
     ports:
-      - "3005:3000"  # Ubah port host menjadi 3005
+      - "3010:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:3008  # URL untuk backend
+      - NEXT_PUBLIC_API_URL=http://localhost:3011
     depends_on:
       - backend
 
@@ -19,12 +20,32 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     image: ${DOCKER_USERNAME}/backend:latest
+    container_name: todo-backend
     ports:
-      - "3008:3008"  # Pastikan port internal dan external sama
+      - "3011:3011"
     environment:
       - NODE_ENV=production
-      - PORT=3008
-      
-networks:
-  default:
-    driver: bridge
+      - PORT=3011
+      - DB_HOST=db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    container_name: todo-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  mysql_data:
