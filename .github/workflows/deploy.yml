@@ -7,12 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DB_USER: ${{ secrets.DB_USER }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -24,15 +18,17 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Push
+        shell: bash
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
         run: |
-          echo "DOCKER_USERNAME=$DOCKER_USERNAME" > .env
-          echo "DB_USER=$DB_USER" >> .env
-          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-          echo "DB_NAME=$DB_NAME" >> .env
-          echo "DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD" >> .env
-          
-          docker compose -f docker-compose.prod.yml build
-          docker compose -f docker-compose.prod.yml push
+          printenv > .env
+          docker-compose -f docker-compose.prod.yml build
+          docker-compose -f docker-compose.prod.yml push
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
@@ -40,17 +36,19 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DOCKER_USERNAME,DB_USER,DB_PASSWORD,DB_NAME,DB_ROOT_PASSWORD
           script: |
             cd /app/todo-pipeline-demo
             
-            cat > .env << EOL
-            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
-            EOL
+            # Create minimal .env file
+            {
+              echo "DOCKER_USERNAME=${DOCKER_USERNAME}"
+              echo "DB_USER=${DB_USER}"
+              echo "DB_PASSWORD=${DB_PASSWORD}"
+              echo "DB_NAME=${DB_NAME}"
+              echo "DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}"
+            } > .env
             
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml down --remove-orphans
-            docker compose -f docker-compose.prod.yml up -d
+            docker-compose -f docker-compose.prod.yml pull
+            docker-compose -f docker-compose.prod.yml down --remove-orphans
+            docker-compose -f docker-compose.prod.yml up -d
