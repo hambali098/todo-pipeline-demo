@@ -7,10 +7,10 @@ services:
       dockerfile: Dockerfile
     image: ${DOCKER_USERNAME}/frontend:latest
     ports:
-      - "3008:3000"  # Port untuk Next.js app
+      - "3009:3000"  # Port untuk Next.js app
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:3000  # URL untuk backend
+      - NEXT_PUBLIC_API_URL=http://backend:3008  # URL untuk backend dengan port yang benar
     depends_on:
       - backend
 
@@ -20,10 +20,10 @@ services:
       dockerfile: Dockerfile
     image: ${DOCKER_USERNAME}/backend:latest
     ports:
-      - "3000:3000"
+      - "3008:3008"  # Port yang berbeda untuk backend
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=3008  # Pastikan aplikasi backend mendengarkan port ini
     # Tambahkan volume jika perlu untuk persistensi data
     # volumes:
     #   - ./backend/data:/app/data
