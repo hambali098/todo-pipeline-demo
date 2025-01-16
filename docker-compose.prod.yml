@@ -42,11 +42,11 @@ jobs:
             
             # Create minimal .env file
             {
-              echo "DOCKER_USERNAME=${DOCKER_USERNAME}"
-              echo "DB_USER=${DB_USER}"
-              echo "DB_PASSWORD=${DB_PASSWORD}"
-              echo "DB_NAME=${DB_NAME}"
-              echo "DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}"
+              echo "DOCKER_USERNAME=$$DOCKER_USERNAME"
+              echo "DB_USER=$$DB_USER"
+              echo "DB_PASSWORD=$$DB_PASSWORD"
+              echo "DB_NAME=$$DB_NAME"
+              echo "DB_ROOT_PASSWORD=$$DB_ROOT_PASSWORD"
             } > .env
             
             docker-compose -f docker-compose.prod.yml pull
