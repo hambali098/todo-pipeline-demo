@@ -24,20 +24,18 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          # Build images
           docker compose -f docker-compose.prod.yml build
-          
-          # Push images
           docker compose -f docker-compose.prod.yml push
 
       - name: Deploy to VPS
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v2.0.0  # Update ke versi terbaru
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          debug: true  # Tambahkan mode debug
           script: |
-            cd /path/to/your/app
+            cd /app/todo-pipeline-demo     # Path yang benar sesuai setup sebelumnya
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml down
