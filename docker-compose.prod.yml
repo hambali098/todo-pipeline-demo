@@ -1,46 +1,35 @@
-version: '3.8'
-services:
-  frontend:
-    build: 
-      context: ./frontend
-      dockerfile: Dockerfile
-    image: humbleboy123/frontend:latest  # Image name untuk Docker Hub
-    ports:
-      - "3002:3000"
-    networks:
-      - app_network
+name: CI/CD Pipeline
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    image: humbleboy123/backend:latest  # Image name untuk Docker Hub
-    ports:
-      - "3003:3001"
-    networks:
-      - app_network
-    depends_on:
-      - db
-    environment:
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=example
-      - DB_NAME=tododb
+on:
+  push:
+    branches: [ main ]
 
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-  db:
-    image: mysql:8
-    networks:
-      - app_network
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: tododb
-    volumes:
-      - db_data:/var/lib/mysql
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-networks:
-  app_network:
-    driver: bridge
+      - name: Build and push images
+        run: |
+          # Build dan push menggunakan docker compose
+          docker compose -f docker-compose.prod.yml build
+          docker compose -f docker-compose.prod.yml push
 
-volumes:
-  db_data:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /app/todo-pipeline-demo
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d
