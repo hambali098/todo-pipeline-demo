@@ -24,10 +24,9 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          docker compose -f docker-compose.prod.yml build
-          docker compose -f docker-compose.prod.yml push
+          docker-compose -f docker-compose.prod.yml build
+          docker-compose -f docker-compose.prod.yml push
 
-      # Tambahkan debug info
       - name: Debug Info
         run: |
           echo "GitHub Workspace: $GITHUB_WORKSPACE"
@@ -37,7 +36,7 @@ jobs:
           echo "SSH Key set: ${{ secrets.SSH_PRIVATE_KEY != '' }}"
 
       - name: Deploy to VPS
-        uses: appleboy/ssh-action@master    # Gunakan @master instead of @v2.0.0
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -46,6 +45,12 @@ jobs:
           script: |
             cd /app/todo-pipeline-demo
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml up -d
+            
+            # Pull new images
+            docker-compose -f docker-compose.prod.yml pull
+            
+            # Stop and remove existing containers
+            docker-compose -f docker-compose.prod.yml down
+            
+            # Start new containers
+            docker-compose -f docker-compose.prod.yml up -d
