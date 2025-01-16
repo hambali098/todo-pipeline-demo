@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   frontend:
     build:
@@ -5,7 +7,10 @@ services:
       dockerfile: Dockerfile
     image: ${DOCKER_USERNAME}/frontend:latest
     ports:
-      - "80:80"
+      - "3008:3000"  # Port untuk Next.js app
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://backend:3000  # URL untuk backend
     depends_on:
       - backend
 
@@ -18,4 +23,11 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      # Tambahkan environment variables lain yang diperlukan
+      - PORT=3000
+    # Tambahkan volume jika perlu untuk persistensi data
+    # volumes:
+    #   - ./backend/data:/app/data
+
+networks:
+  default:
+    driver: bridge
