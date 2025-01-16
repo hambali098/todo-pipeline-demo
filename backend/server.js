@@ -7,15 +7,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Koneksi database akan menggunakan environment variables
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST || 'db',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_NAME || 'tododb'
 });
 
-// Endpoint untuk mendapatkan semua todos
 app.get('/todos', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM todos');
@@ -25,7 +23,6 @@ app.get('/todos', async (req, res) => {
   }
 });
 
-// Endpoint untuk membuat todo baru
 app.post('/todos', async (req, res) => {
   const { title } = req.body;
   try {
@@ -36,7 +33,7 @@ app.post('/todos', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 3011;
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
