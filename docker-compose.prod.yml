@@ -13,21 +13,22 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: "${{ secrets.DOCKER_USERNAME }}"  # Tambahkan tanda kutip
+          password: "${{ secrets.DOCKER_PASSWORD }}"  # Tambahkan tanda kutip
 
       - name: Build and push images
+        env:  # Gunakan env untuk mengatur environment variables
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          # Build dan push menggunakan docker compose
           docker compose -f docker-compose.prod.yml build
           docker compose -f docker-compose.prod.yml push
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: root
-          key: ${{ secrets.SSH_KEY }}
+          host: "${{ secrets.HOST }}"
+          username: "root"
+          key: "${{ secrets.SSH_KEY }}"
           script: |
             cd /app/todo-pipeline-demo
             docker compose -f docker-compose.prod.yml pull
