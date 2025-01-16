@@ -34,24 +34,23 @@ jobs:
           docker-compose -f docker-compose.prod.yml build
           docker-compose -f docker-compose.prod.yml push
 
-      - name: Debug Info
-        run: |
-          echo "GitHub Workspace: $GITHUB_WORKSPACE"
-          echo "Docker Username set: ${{ secrets.DOCKER_USERNAME != '' }}"
-          echo "SSH Host set: ${{ secrets.HOST != '' }}"
-          echo "SSH Username set: ${{ secrets.SSH_USERNAME != '' }}"
-          echo "SSH Key set: ${{ secrets.SSH_PRIVATE_KEY != '' }}"
-
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          debug: true
-          script: |
-            cd /app/todo-pipeline-demo
-            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-            docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml down
-            docker-compose -f docker-compose.prod.yml up -d
+          - name: Deploy to VPS
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.SSH_USERNAME }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            debug: true
+            script: |
+              cd /app/todo-pipeline-demo
+              
+              # Kill process yang menggunakan port 3000
+              sudo kill -9 $(sudo lsof -t -i:3000) || true
+              
+              # Cleanup existing containers
+              docker-compose -f docker-compose.prod.yml down --remove-orphans
+              docker container prune -f
+              
+              export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+              docker-compose -f docker-compose.prod.yml pull
+              docker-compose -f docker-compose.prod.yml up -d
