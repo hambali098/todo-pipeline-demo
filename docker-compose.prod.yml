@@ -6,10 +6,10 @@ services:
     image: ${DOCKER_USERNAME}/frontend:latest
     container_name: todo-frontend
     ports:
-      - "3010:3000"
+      - "3012:3000"  # Ubah ke port yang belum digunakan
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:3011
+      - NEXT_PUBLIC_API_URL=http://localhost:3013  # Sesuaikan dengan port backend baru
     depends_on:
       - backend
 
@@ -20,7 +20,7 @@ services:
     image: ${DOCKER_USERNAME}/backend:latest
     container_name: todo-backend
     ports:
-      - "3011:3011"
+      - "3013:3011"  # Ubah ke port yang belum digunakan
     environment:
       - NODE_ENV=production
       - PORT=3011
@@ -43,7 +43,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"  # Ubah port MySQL karena 3306 sudah digunakan
 
 volumes:
   mysql_data:
