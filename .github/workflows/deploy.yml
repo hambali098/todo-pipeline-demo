@@ -26,7 +26,6 @@ jobs:
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
         run: |
-          printenv > .env
           docker-compose -f docker-compose.prod.yml build
           docker-compose -f docker-compose.prod.yml push
 
@@ -36,18 +35,17 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DOCKER_USERNAME,DB_USER,DB_PASSWORD,DB_NAME,DB_ROOT_PASSWORD
           script: |
             cd /app/todo-pipeline-demo
             
-            # Create minimal .env file
-            {
-              echo "DOCKER_USERNAME=${DOCKER_USERNAME}"
-              echo "DB_USER=${DB_USER}"
-              echo "DB_PASSWORD=${DB_PASSWORD}"
-              echo "DB_NAME=${DB_NAME}"
-              echo "DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}"
-            } > .env
+            # Create .env file
+            cat > .env << EOL
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+            EOL
             
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml down --remove-orphans
