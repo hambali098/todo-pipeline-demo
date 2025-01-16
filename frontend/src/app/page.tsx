@@ -16,7 +16,7 @@ export default function Home() {
           <li className="mb-2">
          ayo mulaiiii melangkah bersamssasdasdasda ku{" "}
             <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsxxxxxxxxxxxxxxxxxxxxxxx
+              src/app/page.tsxxxxxssssxxxxxxxxxxxxxxxxxx
             </code>
             .
           </li>
