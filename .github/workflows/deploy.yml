@@ -27,15 +27,24 @@ jobs:
           docker compose -f docker-compose.prod.yml build
           docker compose -f docker-compose.prod.yml push
 
+      # Tambahkan debug info
+      - name: Debug Info
+        run: |
+          echo "GitHub Workspace: $GITHUB_WORKSPACE"
+          echo "Docker Username set: ${{ secrets.DOCKER_USERNAME != '' }}"
+          echo "SSH Host set: ${{ secrets.HOST != '' }}"
+          echo "SSH Username set: ${{ secrets.SSH_USERNAME != '' }}"
+          echo "SSH Key set: ${{ secrets.SSH_PRIVATE_KEY != '' }}"
+
       - name: Deploy to VPS
-        uses: appleboy/ssh-action@v2.0.0  # Update ke versi terbaru
+        uses: appleboy/ssh-action@master    # Gunakan @master instead of @v2.0.0
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          debug: true  # Tambahkan mode debug
+          debug: true
           script: |
-            cd /app/todo-pipeline-demo     # Path yang benar sesuai setup sebelumnya
+            cd /app/todo-pipeline-demo
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml down
